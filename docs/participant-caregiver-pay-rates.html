@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Participant Caregiver Pay Rates</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+  <style>
+    body {
+      max-width: 960px;
+      margin: 2em auto;
+      padding: 1em;
+    }
+  </style>
+</head>
+<body class="markdown-body">
+<hr />
+<h2>title: Participant Caregiver Pay Rates</h2>
+<h1>Participant Caregiver Pay Rates</h1>
+<p><em>Path</em>: <code>../PAYRATE/pce/</code></p>
+<p>| Column | Type | Required |
+|--------|------|----------|
+| ParticipantId | string | ✅ |
+| CaregiverEmployerId | string | ✅ |
+| ServiceCode | string | ✅ |
+| BillCode | string | ❌ |
+| StartDate | date | ✅ |
+| EndDate | date | ❌ |
+| StartTime | time | ✅ |
+| EndTime | time | ❌ |
+| ValidDays | string | ❌ |
+| EarnType | string | ❌ |
+| IsOvertimeEligible | boolean | ❌ |
+| Rate | number | ✅ |
+| HolidayPremium | number | ❌ |
+| IsActive | boolean | ❌ |</p>
+</body>
+</html>
