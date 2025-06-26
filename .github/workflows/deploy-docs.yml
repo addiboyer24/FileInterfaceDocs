@@ -3,9 +3,9 @@ name: Build and Deploy Documentation
 on:
   push:
     paths:
-      - './packages/datapackage.json'
-      - './packages/docs/**.md'
-      - './packages/generate_docs_pipeline.py'
+      - 'datapackage.json'
+      - 'docs/**.md'
+      - 'generate_docs_pipeline.py'
 
 jobs:
   build-deploy:
@@ -26,7 +26,7 @@ jobs:
           pip install livemark
 
       - name: Run docs generation script
-        run: python ./packages/generate_docs_pipeline.py
+        run: python generate_docs_pipeline.py
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
