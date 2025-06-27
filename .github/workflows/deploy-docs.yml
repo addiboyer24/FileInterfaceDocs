@@ -3,7 +3,7 @@ name: Build and Deploy Documentation
 on:
   push:
     branches:
-      - main        # Adjust if you use a different default branch
+      - main
     paths:
       - 'datapackage.json'
       - 'docs/**.md'
@@ -36,9 +36,11 @@ jobs:
       - name: Generate Documentation
         run: python generate_docs_pipeline.py
 
+      - name: Create .nojekyll file
+        run: touch docs/.nojekyll
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs
-          # Optional: customize if you want custom domain, user.name/email, etc.
