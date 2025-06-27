@@ -36,7 +36,7 @@ jobs:
       - name: Generate Documentation
         run: python generate_docs_pipeline.py
 
-      - name: Create .nojekyll file
+      - name: Add .nojekyll file
         run: touch docs/.nojekyll
 
       - name: Deploy to GitHub Pages
