@@ -31,12 +31,8 @@ if not os.path.exists(index_file):
 
 # Try to run livemark and capture output
 try:
-    result = subprocess.run(
-        ["livemark", "build", docs_dir],
-        check=True,
-        capture_output=True,
-        text=True
-    )
+    result = subprocess.run(["livemark", "build", os.path.join(docs_dir, "index.md")], check=True, capture_output=True, text=True)
+
     print(result.stdout)
 except subprocess.CalledProcessError as e:
     print("❌ Livemark build failed!")
