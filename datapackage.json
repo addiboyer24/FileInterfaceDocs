@@ -6,7 +6,7 @@
     {
       "name": "employer-pay-rates",
       "description": "CSV files located under PAYRATE/employer/ with employer pay rate records.",
-      "path": "../PAYRATE/employer/",
+      "path": "PAYRATE/employer/",
       "format": "csv",
       "schema": {
         "fields": [
@@ -28,7 +28,7 @@
     {
       "name": "participant-caregiver-pay-rates",
       "description": "CSV files located under PAYRATE/pce/ with participant caregiver employer pay rate records.",
-      "path": "../PAYRATE/pce/",
+      "path": "PAYRATE/pce/",
       "format": "csv",
       "schema": {
         "fields": [

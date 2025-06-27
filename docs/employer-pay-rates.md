@@ -5,9 +5,9 @@ version: 1.0
 
 # Employer Pay Rates
 
-**Path:** `../PAYRATE/employer/`
+**Path:** `PAYRATE/employer/`
 
-`📁 ../PAYRATE/employer/`
+`📁 PAYRATE/employer/`
 
 | Column | Type | Required |
 |--------|------|----------|

@@ -5,9 +5,9 @@ version: 1.0
 
 # Participant Caregiver Pay Rates
 
-**Path:** `../PAYRATE/pce/`
+**Path:** `PAYRATE/pce/`
 
-`📁 ../PAYRATE/pce/`
+`📁 PAYRATE/pce/`
 
 | Column | Type | Required |
 |--------|------|----------|
