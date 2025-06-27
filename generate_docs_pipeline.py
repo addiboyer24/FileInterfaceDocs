@@ -7,7 +7,7 @@ import markdown
 # === CONFIGURATION ===
 INPUT_FILE = "datapackage.json"
 OUTPUT_DIR = "docs"
-CUSTOM_CSS_FILE = "custom.css"  # Optional styling
+CUSTOM_CSS_FILE = "custom.css"
 USE_EMOJI = True
 RUN_LIVEMARK_BUILD = True
 GENERATE_HTML = True
@@ -23,24 +23,19 @@ with open(INPUT_FILE, "r", encoding="utf-8") as f:
 resources = package.get("resources", [])
 version = package.get("version", None)
 
-# Copy custom.css if present
-css_target_path = os.path.join(OUTPUT_DIR, "custom.css")
+# Copy custom CSS
+css_path = os.path.join(OUTPUT_DIR, "custom.css")
 if os.path.isfile(CUSTOM_CSS_FILE):
-    shutil.copy(CUSTOM_CSS_FILE, css_target_path)
-    print(f"🎨 Copied custom CSS to: {css_target_path}")
-else:
-    print("⚠️ No custom.css found – skipping style customization.")
+    shutil.copy(CUSTOM_CSS_FILE, css_path)
 
-# Write .nojekyll to disable GitHub Pages Jekyll processing
-nojekyll_path = os.path.join(OUTPUT_DIR, ".nojekyll")
-with open(nojekyll_path, "w", encoding="utf-8") as f:
+# Add .nojekyll to bypass Jekyll
+with open(os.path.join(OUTPUT_DIR, ".nojekyll"), "w") as f:
     f.write("")
-print("📛 Wrote .nojekyll to disable GitHub Jekyll processing")
 
-# Generate Markdown and HTML docs
+# Generate .md and .html files
 for resource in resources:
-    resource_name = resource["name"]
-    title = resource_name.replace("-", " ").title()
+    name = resource["name"]
+    title = name.replace("-", " ").title()
     schema = resource.get("schema", {})
     fields = schema.get("fields", [])
     path = resource.get("path", "unknown")
@@ -50,158 +45,118 @@ for resource in resources:
         f"title: {title}",
         f"version: {version or '1.0'}",
         "---",
-        "",
         f"# {title}",
-        "",
         f"**Path:** `{path}`",
         "",
-    ]
-
-    if INCLUDE_BREADCRUMBS:
-        md_lines += [f"`📁 {path}`", ""]
-
-    md_lines += [
         "| Column | Type | Required |",
-        "|--------|------|----------|"
+        "|--------|------|----------|",
     ]
 
     for field in fields:
-        name = field["name"]
+        fname = field["name"]
         ftype = field.get("type", "string")
-        required_raw = field.get("constraints", {}).get("required", False)
-        required = "✅" if USE_EMOJI and required_raw else "❌" if USE_EMOJI else "Yes" if required_raw else "No"
-        md_lines.append(f"| {name} | {ftype} | {required} |")
+        required = field.get("constraints", {}).get("required", False)
+        req_display = "✅" if USE_EMOJI and required else "❌" if USE_EMOJI else "Yes" if required else "No"
+        md_lines.append(f"| {fname} | {ftype} | {req_display} |")
 
     md_content = "\n".join(md_lines)
-    md_path = os.path.join(OUTPUT_DIR, f"{resource_name}.md")
-
-    with open(md_path, "w", encoding="utf-8") as md_file:
-        md_file.write(md_content)
-    print(f"✅ Wrote schema doc: {md_path}")
+    md_filename = f"{name}.md"
+    md_path = os.path.join(OUTPUT_DIR, md_filename)
+    with open(md_path, "w", encoding="utf-8") as f:
+        f.write(md_content)
 
     if GENERATE_HTML:
-        html_content = markdown.markdown(md_content, extensions=["tables"])
-        html_template = f"""<!DOCTYPE html>
+        html_body = markdown.markdown(md_content, extensions=["tables"])
+        html_page = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{title}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-  {"<link rel='stylesheet' href='custom.css'>" if os.path.isfile(css_target_path) else ""}
+  {"<link rel='stylesheet' href='custom.css'>" if os.path.isfile(css_path) else ""}
   <style>
-    body {{
-      max-width: 960px;
-      margin: 2em auto;
-      padding: 1em;
-    }}
+    body {{ max-width: 960px; margin: 2em auto; padding: 1em; }}
   </style>
 </head>
 <body class="markdown-body">
-{html_content}
+{html_body}
 </body>
-</html>
-"""
-        html_path = os.path.join(OUTPUT_DIR, f"{resource_name}.html")
-        with open(html_path, "w", encoding="utf-8") as html_file:
-            html_file.write(html_template)
-        print(f"🌐 Wrote HTML doc: {html_path}")
+</html>"""
+        html_filename = f"{name}.html"
+        html_path = os.path.join(OUTPUT_DIR, html_filename)
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(html_page)
 
-# Create index.md with links to the markdown files (for Livemark routing)
-index_lines = [
-    "# File-Based Interface Documentation",
-    "",
-    f"_Generated from datapackage.json{f' (v{version})' if version else ''}_",
+# Write Markdown index for Livemark
+index_md_lines = [
+    "# File Interface Documentation",
+    f"_Generated from datapackage.json{f' v{version}' if version else ''}_",
     "",
     "## Interfaces",
-    ""
 ]
 
-for res in resources:
-    name = res["name"]
+for resource in resources:
+    name = resource["name"]
     title = name.replace("-", " ").title()
-    md_link = f"{name}.md"  # Link to markdown, not html
-    index_lines.append(f"- [{title}]({md_link})")
+    index_md_lines.append(f"- [{title}]({name}.md)")
 
-index_path = os.path.join(OUTPUT_DIR, "index.md")
-with open(index_path, "w", encoding="utf-8") as index_file:
-    index_file.write("\n".join(index_lines))
-print(f"✅ Wrote index page: {index_path}")
+with open(os.path.join(OUTPUT_DIR, "index.md"), "w", encoding="utf-8") as f:
+    f.write("\n".join(index_md_lines))
 
-# Also generate index.html with links to the generated HTML files (for static viewing)
-html_index_lines = [
+# Write HTML index for GitHub Pages
+index_html_lines = [
     "<!DOCTYPE html>",
     "<html lang='en'>",
     "<head>",
-    "  <meta charset='UTF-8'>",
-    f"  <title>File-Based Interface Documentation{f' v{version}' if version else ''}</title>",
-    "  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css'>",
+    f"  <meta charset='UTF-8'>",
+    f"  <title>File Interface Documentation</title>",
+    f"  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css'>",
     "</head>",
     "<body class='markdown-body'>",
-    f"<h1>File-Based Interface Documentation{f' v{version}' if version else ''}</h1>",
-    "<ul>"
+    f"<h1>File Interface Documentation</h1>",
+    f"<p>Generated from <code>{INPUT_FILE}</code>{f' v{version}' if version else ''}</p>",
+    "<ul>",
 ]
 
-for res in resources:
-    name = res["name"]
+for resource in resources:
+    name = resource["name"]
     title = name.replace("-", " ").title()
-    html_file = f"{name}.html"  # HTML link here
-    html_index_lines.append(f"  <li><a href='{html_file}'>{title}</a></li>")
+    index_html_lines.append(f"  <li><a href='{name}.html'>{title}</a></li>")
 
-html_index_lines += [
+index_html_lines += [
     "</ul>",
     "</body>",
     "</html>"
 ]
 
-html_index_content = "\n".join(html_index_lines)
-html_index_path = os.path.join(OUTPUT_DIR, "index.html")
-with open(html_index_path, "w", encoding="utf-8") as f:
-    f.write(html_index_content)
-print(f"🌐 Wrote HTML index page: {html_index_path}")
+with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
+    f.write("\n".join(index_html_lines))
 
-# Generate livemark.yml navigation pointing to markdown files
-nav_interfaces = []
-for res in resources:
-    name = res["name"]
-    title = name.replace("-", " ").title()
-    md_file = f"{name}.md"
-    nav_interfaces.append(f"      - {title}: {md_file}")
-
-nav_section = "\n".join(nav_interfaces)
-
-livemark_content = f"""site:
-  title: File-Based Interface Documentation
-  description: Documentation portal for all file-based data interfaces and schemas
-  logo: https://yourcompany.com/logo.png
-  favicon: https://yourcompany.com/favicon.ico
+# Write livemark.yml
+nav_entries = "\n".join([f"      - {res['name'].replace('-', ' ').title()}: {res['name']}.md" for res in resources])
+livemark_yml = f"""site:
+  title: File Interface Docs
+  description: Autogenerated file interface reference
   baseurl: ""
-  keywords:
-    - file interface
-    - csv schema
-    - datapackage
-  repository: https://github.com/your-org/your-docs-repo
   license: MIT
+  favicon: https://yourdomain.com/favicon.ico
 
 theme:
   palette: light
-  highlight: github
 
 nav:
   - Home: index.md
   - Interfaces:
-{nav_section}
+{nav_entries}
 """
 
-livemark_yml_path = os.path.join(OUTPUT_DIR, "livemark.yml")
-with open(livemark_yml_path, "w", encoding="utf-8") as yml_file:
-    yml_file.write(livemark_content)
-print(f"✅ Wrote Livemark config: {livemark_yml_path}")
+with open(os.path.join(OUTPUT_DIR, "livemark.yml"), "w", encoding="utf-8") as f:
+    f.write(livemark_yml)
 
-# Run Livemark build (generates site HTML etc)
+# Run Livemark build
 if RUN_LIVEMARK_BUILD:
     try:
-        print("\n🚧 Running `livemark build` ...")
         subprocess.run(["livemark", "build", os.path.join(OUTPUT_DIR, "index.md")], check=True)
-        print("✅ Livemark build completed successfully!")
+        print("✅ Livemark site built.")
     except Exception as e:
-        print(f"❌ Error running livemark build: {e}")
+        print(f"❌ Livemark build failed: {e}")

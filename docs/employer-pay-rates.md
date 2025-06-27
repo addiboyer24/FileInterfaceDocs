@@ -2,12 +2,8 @@
 title: Employer Pay Rates
 version: 1.0
 ---
-
 # Employer Pay Rates
-
 **Path:** `PAYRATE/employer/`
-
-`📁 PAYRATE/employer/`
 
 | Column | Type | Required |
 |--------|------|----------|
