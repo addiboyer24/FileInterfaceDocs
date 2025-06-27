@@ -1,16 +1,19 @@
 import os
 import json
+import shutil
 import subprocess
 import markdown
 
 # === CONFIGURATION ===
 INPUT_FILE = "datapackage.json"
 OUTPUT_DIR = "docs"
-LIVEMARK_YML = os.path.join(OUTPUT_DIR, "livemark.yml")
-USE_EMOJI = True  # Use ✅/❌ for required fields
-RUN_LIVEMARK_BUILD = True  # Set False to skip building
+CUSTOM_CSS_FILE = "custom.css"  # Optional styling
+USE_EMOJI = True
+RUN_LIVEMARK_BUILD = True
 GENERATE_HTML = True
+INCLUDE_BREADCRUMBS = True
 
+# === Setup ===
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # Load datapackage
@@ -18,8 +21,17 @@ with open(INPUT_FILE, "r", encoding="utf-8") as f:
     package = json.load(f)
 
 resources = package.get("resources", [])
+version = package.get("version", None)
 
-# Generate Markdown and HTML docs for each resource
+# Copy custom.css if present
+css_target_path = os.path.join(OUTPUT_DIR, "custom.css")
+if os.path.isfile(CUSTOM_CSS_FILE):
+    shutil.copy(CUSTOM_CSS_FILE, css_target_path)
+    print(f"🎨 Copied custom CSS to: {css_target_path}")
+else:
+    print("⚠️ No custom.css found – skipping style customization.")
+
+# Generate Markdown and HTML docs
 for resource in resources:
     resource_name = resource["name"]
     title = resource_name.replace("-", " ").title()
@@ -30,12 +42,19 @@ for resource in resources:
     md_lines = [
         "---",
         f"title: {title}",
+        f"version: {version or '1.0'}",
         "---",
         "",
         f"# {title}",
         "",
-        f"_Path_: `{path}`",
+        f"**Path:** `{path}`",
         "",
+    ]
+
+    if INCLUDE_BREADCRUMBS:
+        md_lines += [f"`📁 {path}`", ""]
+
+    md_lines += [
         "| Column | Type | Required |",
         "|--------|------|----------|"
     ]
@@ -54,15 +73,15 @@ for resource in resources:
         md_file.write(md_content)
     print(f"✅ Wrote schema doc: {md_path}")
 
-    # Optionally generate HTML
     if GENERATE_HTML:
-        html_content = markdown.markdown(md_content)
+        html_content = markdown.markdown(md_content, extensions=["tables"])
         html_template = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>{title}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+  {"<link rel='stylesheet' href='custom.css'>" if os.path.isfile(css_target_path) else ""}
   <style>
     body {{
       max-width: 960px;
@@ -81,11 +100,11 @@ for resource in resources:
             html_file.write(html_template)
         print(f"🌐 Wrote HTML doc: {html_path}")
 
-# Generate index.md with links to all interface docs
+# Create index.md
 index_lines = [
     "# File-Based Interface Documentation",
     "",
-    "Welcome to the documentation portal for all file-based interfaces.",
+    f"_Generated from datapackage.json{f' (v{version})' if version else ''}_",
     "",
     "## Interfaces",
     ""
@@ -94,21 +113,21 @@ index_lines = [
 for res in resources:
     name = res["name"]
     title = name.replace("-", " ").title()
-    filename = f"{name}.md"
-    index_lines.append(f"- [{title}]({filename})")
+    html_link = f"{name}.html"
+    index_lines.append(f"- [{title}]({html_link})")
 
 index_path = os.path.join(OUTPUT_DIR, "index.md")
 with open(index_path, "w", encoding="utf-8") as index_file:
     index_file.write("\n".join(index_lines))
 print(f"✅ Wrote index page: {index_path}")
 
-# Generate livemark.yml nav section
+# Generate livemark.yml
 nav_interfaces = []
 for res in resources:
     name = res["name"]
     title = name.replace("-", " ").title()
-    filename = f"{name}.md"
-    nav_interfaces.append(f"      - {title}: {filename}")
+    md_file = f"{name}.md"
+    nav_interfaces.append(f"      - {title}: {md_file}")
 
 nav_section = "\n".join(nav_interfaces)
 
@@ -121,7 +140,6 @@ livemark_content = f"""site:
   keywords:
     - file interface
     - csv schema
-    - frictionless
     - datapackage
   repository: https://github.com/your-org/your-docs-repo
   license: MIT
@@ -136,11 +154,12 @@ nav:
 {nav_section}
 """
 
-with open(LIVEMARK_YML, "w", encoding="utf-8") as yml_file:
+livemark_yml_path = os.path.join(OUTPUT_DIR, "livemark.yml")
+with open(livemark_yml_path, "w", encoding="utf-8") as yml_file:
     yml_file.write(livemark_content)
-print(f"✅ Wrote Livemark config: {LIVEMARK_YML}")
+print(f"✅ Wrote Livemark config: {livemark_yml_path}")
 
-# Optionally run livemark build
+# Run Livemark
 if RUN_LIVEMARK_BUILD:
     try:
         print("\n🚧 Running `livemark build` ...")

@@ -1,10 +1,13 @@
 ---
 title: Participant Caregiver Pay Rates
+version: 1.0
 ---
 
 # Participant Caregiver Pay Rates
 
-_Path_: `../PAYRATE/pce/`
+**Path:** `../PAYRATE/pce/`
+
+`📁 ../PAYRATE/pce/`
 
 | Column | Type | Required |
 |--------|------|----------|

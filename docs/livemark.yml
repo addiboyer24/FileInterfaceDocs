@@ -7,7 +7,6 @@ site:
   keywords:
     - file interface
     - csv schema
-    - frictionless
     - datapackage
   repository: https://github.com/your-org/your-docs-repo
   license: MIT

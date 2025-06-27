@@ -1,8 +1,8 @@
 # File-Based Interface Documentation
 
-Welcome to the documentation portal for all file-based interfaces.
+_Generated from datapackage.json_
 
 ## Interfaces
 
-- [Employer Pay Rates](employer-pay-rates.md)
-- [Participant Caregiver Pay Rates](participant-caregiver-pay-rates.md)
+- [Employer Pay Rates](employer-pay-rates.html)
+- [Participant Caregiver Pay Rates](participant-caregiver-pay-rates.html)
