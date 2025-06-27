@@ -4,5 +4,5 @@ _Generated from datapackage.json_
 
 ## Interfaces
 
-- [Employer Pay Rates](employer-pay-rates.html)
-- [Participant Caregiver Pay Rates](participant-caregiver-pay-rates.html)
+- [Employer Pay Rates](employer-pay-rates.md)
+- [Participant Caregiver Pay Rates](participant-caregiver-pay-rates.md)
