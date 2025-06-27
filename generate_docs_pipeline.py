@@ -106,7 +106,8 @@ for resource in resources:
             html_file.write(html_template)
         print(f"🌐 Wrote HTML doc: {html_path}")
 
-# Create index.md with links to HTML docs
+# Create index.md with links to the markdown files (not html)
+# This is required for Livemark to route links properly and avoid 404s
 index_lines = [
     "# File-Based Interface Documentation",
     "",
@@ -119,15 +120,15 @@ index_lines = [
 for res in resources:
     name = res["name"]
     title = name.replace("-", " ").title()
-    html_link = f"{name}.html"
-    index_lines.append(f"- [{title}]({html_link})")
+    md_link = f"{name}.md"  # Link to markdown, not html
+    index_lines.append(f"- [{title}]({md_link})")
 
 index_path = os.path.join(OUTPUT_DIR, "index.md")
 with open(index_path, "w", encoding="utf-8") as index_file:
     index_file.write("\n".join(index_lines))
 print(f"✅ Wrote index page: {index_path}")
 
-# Generate livemark.yml navigation
+# Generate livemark.yml navigation pointing to markdown files
 nav_interfaces = []
 for res in resources:
     name = res["name"]
@@ -165,7 +166,7 @@ with open(livemark_yml_path, "w", encoding="utf-8") as yml_file:
     yml_file.write(livemark_content)
 print(f"✅ Wrote Livemark config: {livemark_yml_path}")
 
-# Run Livemark build
+# Run Livemark build (generates site HTML etc)
 if RUN_LIVEMARK_BUILD:
     try:
         print("\n🚧 Running `livemark build` ...")
