@@ -1,0 +1,22 @@
+site:
+  title: File-Based Interface Documentation
+  description: Documentation portal for all file-based data interfaces and schemas
+  logo: https://yourcompany.com/logo.png
+  favicon: https://yourcompany.com/favicon.ico
+  baseurl: ""
+  keywords:
+    - file interface
+    - csv schema
+    - datapackage
+  repository: https://github.com/your-org/your-docs-repo
+  license: MIT
+
+theme:
+  palette: light
+  highlight: github
+
+nav:
+  - Home: index.md
+  - Interfaces:
+      - Employer Pay Rates: employer-pay-rates.md
+      - Participant Caregiver Pay Rates: participant-caregiver-pay-rates.md

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Participant Caregiver Pay Rates</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
+  <link rel='stylesheet' href='custom.css'>
+  <style>
+    body {
+      max-width: 960px;
+      margin: 2em auto;
+      padding: 1em;
+    }
+  </style>
+</head>
+<body class="markdown-body">
+<hr />
+<p>title: Participant Caregiver Pay Rates
+version: 1.0</p>
+<hr />
+<h1>Participant Caregiver Pay Rates</h1>
+<p><strong>Path:</strong> <code>PAYRATE/pce/</code></p>
+<p><code>📁 PAYRATE/pce/</code></p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ParticipantId</td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>CaregiverEmployerId</td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>ServiceCode</td>
+<td>string</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>BillCode</td>
+<td>string</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>StartDate</td>
+<td>date</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EndDate</td>
+<td>date</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>StartTime</td>
+<td>time</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>EndTime</td>
+<td>time</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>ValidDays</td>
+<td>string</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>EarnType</td>
+<td>string</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>IsOvertimeEligible</td>
+<td>boolean</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Rate</td>
+<td>number</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>HolidayPremium</td>
+<td>number</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>IsActive</td>
+<td>boolean</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
