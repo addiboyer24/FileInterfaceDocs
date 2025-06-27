@@ -31,6 +31,12 @@ if os.path.isfile(CUSTOM_CSS_FILE):
 else:
     print("⚠️ No custom.css found – skipping style customization.")
 
+# Write .nojekyll to disable GitHub Pages Jekyll processing
+nojekyll_path = os.path.join(OUTPUT_DIR, ".nojekyll")
+with open(nojekyll_path, "w", encoding="utf-8") as f:
+    f.write("")
+print("📛 Wrote .nojekyll to disable GitHub Jekyll processing")
+
 # Generate Markdown and HTML docs
 for resource in resources:
     resource_name = resource["name"]
@@ -100,7 +106,7 @@ for resource in resources:
             html_file.write(html_template)
         print(f"🌐 Wrote HTML doc: {html_path}")
 
-# Create index.md
+# Create index.md with links to HTML docs
 index_lines = [
     "# File-Based Interface Documentation",
     "",
@@ -121,7 +127,7 @@ with open(index_path, "w", encoding="utf-8") as index_file:
     index_file.write("\n".join(index_lines))
 print(f"✅ Wrote index page: {index_path}")
 
-# Generate livemark.yml
+# Generate livemark.yml navigation
 nav_interfaces = []
 for res in resources:
     name = res["name"]
@@ -159,7 +165,7 @@ with open(livemark_yml_path, "w", encoding="utf-8") as yml_file:
     yml_file.write(livemark_content)
 print(f"✅ Wrote Livemark config: {livemark_yml_path}")
 
-# Run Livemark
+# Run Livemark build
 if RUN_LIVEMARK_BUILD:
     try:
         print("\n🚧 Running `livemark build` ...")
