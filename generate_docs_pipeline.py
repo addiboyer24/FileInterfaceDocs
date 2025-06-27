@@ -106,8 +106,7 @@ for resource in resources:
             html_file.write(html_template)
         print(f"🌐 Wrote HTML doc: {html_path}")
 
-# Create index.md with links to the markdown files (not html)
-# This is required for Livemark to route links properly and avoid 404s
+# Create index.md with links to the markdown files (for Livemark routing)
 index_lines = [
     "# File-Based Interface Documentation",
     "",
@@ -127,6 +126,38 @@ index_path = os.path.join(OUTPUT_DIR, "index.md")
 with open(index_path, "w", encoding="utf-8") as index_file:
     index_file.write("\n".join(index_lines))
 print(f"✅ Wrote index page: {index_path}")
+
+# Also generate index.html with links to the generated HTML files (for static viewing)
+html_index_lines = [
+    "<!DOCTYPE html>",
+    "<html lang='en'>",
+    "<head>",
+    "  <meta charset='UTF-8'>",
+    f"  <title>File-Based Interface Documentation{f' v{version}' if version else ''}</title>",
+    "  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css'>",
+    "</head>",
+    "<body class='markdown-body'>",
+    f"<h1>File-Based Interface Documentation{f' v{version}' if version else ''}</h1>",
+    "<ul>"
+]
+
+for res in resources:
+    name = res["name"]
+    title = name.replace("-", " ").title()
+    html_file = f"{name}.html"  # HTML link here
+    html_index_lines.append(f"  <li><a href='{html_file}'>{title}</a></li>")
+
+html_index_lines += [
+    "</ul>",
+    "</body>",
+    "</html>"
+]
+
+html_index_content = "\n".join(html_index_lines)
+html_index_path = os.path.join(OUTPUT_DIR, "index.html")
+with open(html_index_path, "w", encoding="utf-8") as f:
+    f.write(html_index_content)
+print(f"🌐 Wrote HTML index page: {html_index_path}")
 
 # Generate livemark.yml navigation pointing to markdown files
 nav_interfaces = []
