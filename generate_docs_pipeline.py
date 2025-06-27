@@ -1,162 +1,45 @@
 import os
-import json
-import shutil
 import subprocess
-import markdown
 
-# === CONFIGURATION ===
-INPUT_FILE = "datapackage.json"
-OUTPUT_DIR = "docs"
-CUSTOM_CSS_FILE = "custom.css"
-USE_EMOJI = True
-RUN_LIVEMARK_BUILD = True
-GENERATE_HTML = True
-INCLUDE_BREADCRUMBS = True
+docs_dir = "docs"
+index_file = os.path.join(docs_dir, "index.md")
+livemark_config = os.path.join(docs_dir, "livemark.yml")
 
-# === Setup ===
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+# Ensure docs directory exists
+os.makedirs(docs_dir, exist_ok=True)
 
-# Load datapackage
-with open(INPUT_FILE, "r", encoding="utf-8") as f:
-    package = json.load(f)
-
-resources = package.get("resources", [])
-version = package.get("version", None)
-
-# Copy custom CSS
-css_path = os.path.join(OUTPUT_DIR, "custom.css")
-if os.path.isfile(CUSTOM_CSS_FILE):
-    shutil.copy(CUSTOM_CSS_FILE, css_path)
-
-# Add .nojekyll to bypass Jekyll
-with open(os.path.join(OUTPUT_DIR, ".nojekyll"), "w") as f:
+# Create .nojekyll file to avoid Jekyll processing on GitHub Pages
+with open(os.path.join(docs_dir, ".nojekyll"), "w") as f:
     f.write("")
 
-# Generate .md and .html files
-for resource in resources:
-    name = resource["name"]
-    title = name.replace("-", " ").title()
-    schema = resource.get("schema", {})
-    fields = schema.get("fields", [])
-    path = resource.get("path", "unknown")
+# Create livemark.yml config if it doesn't exist
+if not os.path.exists(livemark_config):
+    with open(livemark_config, "w") as f:
+        f.write("title: Interface Documentation\nsource: .\n")
 
-    md_lines = [
-        "---",
-        f"title: {title}",
-        f"version: {version or '1.0'}",
-        "---",
-        f"# {title}",
-        f"**Path:** `{path}`",
-        "",
-        "| Column | Type | Required |",
-        "|--------|------|----------|",
+# Create index.md with links to other .md files
+if not os.path.exists(index_file):
+    md_files = [
+        f for f in os.listdir(docs_dir)
+        if f.endswith(".md") and f != "index.md"
     ]
+    with open(index_file, "w") as f:
+        f.write("# 📚 Interface Documentation Index\n\n")
+        for md in sorted(md_files):
+            title = md.replace("-", " ").replace(".md", "").title()
+            f.write(f"- [{title}]({md})\n")
 
-    for field in fields:
-        fname = field["name"]
-        ftype = field.get("type", "string")
-        required = field.get("constraints", {}).get("required", False)
-        req_display = "✅" if USE_EMOJI and required else "❌" if USE_EMOJI else "Yes" if required else "No"
-        md_lines.append(f"| {fname} | {ftype} | {req_display} |")
-
-    md_content = "\n".join(md_lines)
-    md_filename = f"{name}.md"
-    md_path = os.path.join(OUTPUT_DIR, md_filename)
-    with open(md_path, "w", encoding="utf-8") as f:
-        f.write(md_content)
-
-    if GENERATE_HTML:
-        html_body = markdown.markdown(md_content, extensions=["tables"])
-        html_page = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{title}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css">
-  {"<link rel='stylesheet' href='custom.css'>" if os.path.isfile(css_path) else ""}
-  <style>
-    body {{ max-width: 960px; margin: 2em auto; padding: 1em; }}
-  </style>
-</head>
-<body class="markdown-body">
-{html_body}
-</body>
-</html>"""
-        html_filename = f"{name}.html"
-        html_path = os.path.join(OUTPUT_DIR, html_filename)
-        with open(html_path, "w", encoding="utf-8") as f:
-            f.write(html_page)
-
-# Write Markdown index for Livemark
-index_md_lines = [
-    "# File Interface Documentation",
-    f"_Generated from datapackage.json{f' v{version}' if version else ''}_",
-    "",
-    "## Interfaces",
-]
-
-for resource in resources:
-    name = resource["name"]
-    title = name.replace("-", " ").title()
-    index_md_lines.append(f"- [{title}]({name}.md)")
-
-with open(os.path.join(OUTPUT_DIR, "index.md"), "w", encoding="utf-8") as f:
-    f.write("\n".join(index_md_lines))
-
-# Write HTML index for GitHub Pages
-index_html_lines = [
-    "<!DOCTYPE html>",
-    "<html lang='en'>",
-    "<head>",
-    f"  <meta charset='UTF-8'>",
-    f"  <title>File Interface Documentation</title>",
-    f"  <link rel='stylesheet' href='https://cdn.jsdelivr.net/npm/github-markdown-css@5.2.0/github-markdown.min.css'>",
-    "</head>",
-    "<body class='markdown-body'>",
-    f"<h1>File Interface Documentation</h1>",
-    f"<p>Generated from <code>{INPUT_FILE}</code>{f' v{version}' if version else ''}</p>",
-    "<ul>",
-]
-
-for resource in resources:
-    name = resource["name"]
-    title = name.replace("-", " ").title()
-    index_html_lines.append(f"  <li><a href='{name}.html'>{title}</a></li>")
-
-index_html_lines += [
-    "</ul>",
-    "</body>",
-    "</html>"
-]
-
-with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
-    f.write("\n".join(index_html_lines))
-
-# Write livemark.yml
-nav_entries = "\n".join([f"      - {res['name'].replace('-', ' ').title()}: {res['name']}.md" for res in resources])
-livemark_yml = f"""site:
-  title: File Interface Docs
-  description: Autogenerated file interface reference
-  baseurl: ""
-  license: MIT
-  favicon: https://yourdomain.com/favicon.ico
-
-theme:
-  palette: light
-
-nav:
-  - Home: index.md
-  - Interfaces:
-{nav_entries}
-"""
-
-with open(os.path.join(OUTPUT_DIR, "livemark.yml"), "w", encoding="utf-8") as f:
-    f.write(livemark_yml)
-
-# Run Livemark build
-if RUN_LIVEMARK_BUILD:
-    try:
-        subprocess.run(["livemark", "build", os.path.join(OUTPUT_DIR, "index.md")], check=True)
-        print("✅ Livemark site built.")
-    except Exception as e:
-        print(f"❌ Livemark build failed: {e}")
+# Try to run livemark and capture output
+try:
+    result = subprocess.run(
+        ["livemark", "build", docs_dir],
+        check=True,
+        capture_output=True,
+        text=True
+    )
+    print(result.stdout)
+except subprocess.CalledProcessError as e:
+    print("❌ Livemark build failed!")
+    print("STDOUT:\n", e.stdout)
+    print("STDERR:\n", e.stderr)
+    raise
